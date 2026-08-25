@@ -1,82 +1,796 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi App Personal - ReventaPau</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .container {
-            background-color: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            max-width: 600px;
-            width: 100%;
-        }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .placeholder {
-            background-color: #f0f0f0;
-            padding: 30px;
-            border-radius: 8px;
-            text-align: center;
-            color: #999;
-            margin: 20px 0;
-        }
-        
-        .info {
-            background-color: #e8f4f8;
-            padding: 15px;
-            border-left: 4px solid #667eea;
-            margin: 20px 0;
-            border-radius: 4px;
-            color: #333;
-        }
-        
-        .info strong {
-            color: #667eea;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReventaTech · Panel de control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg: #f6f5f2;
+    --surface: #ffffff;
+    --surface-2: #f0eee9;
+    --ink: #1b1b1f;
+    --ink-soft: #6b6a72;
+    --line: #e7e4dd;
+    --violet: #5b4fe9;
+    --violet-soft: #eeecfd;
+    --mint: #1aa06d;
+    --mint-soft: #e4f5ee;
+    --coral: #e1523d;
+    --coral-soft: #fbe9e6;
+    --amber: #d69a2d;
+    --amber-soft: #faf1de;
+    --radius-lg: 22px;
+    --radius-md: 14px;
+    --radius-sm: 9px;
+    --shadow: 0 1px 2px rgba(20,20,25,0.04), 0 10px 30px rgba(20,20,25,0.06);
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    padding: 28px 18px 90px;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,h2,h3, .display{ font-family: 'Space Grotesk', 'Inter', sans-serif; }
+
+  .wrap{ max-width: 1180px; margin: 0 auto; }
+
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    margin-bottom: 26px; flex-wrap: wrap;
+  }
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .brand-mark{
+    width:40px; height:40px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--violet), #8f7bff);
+    display:flex; align-items:center; justify-content:center;
+    color:white; font-family:'Space Grotesk'; font-weight:700; font-size:15px;
+  }
+  .brand h1{ font-size: 19px; margin:0; font-weight:700; }
+  .brand p{ margin:2px 0 0; font-size:12.5px; color: var(--ink-soft); }
+
+  .status-pill{
+    font-size:12px; padding:7px 14px; border-radius: 999px;
+    background: var(--surface-2); color: var(--ink-soft); border:1px solid var(--line);
+  }
+  .status-pill.dirty{ background: var(--coral-soft); color:#a83324; border-color: rgba(225,82,61,0.25); font-weight:600; }
+
+  .stats{
+    display:grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px;
+  }
+  .stat-card{
+    background: var(--surface); border-radius: var(--radius-lg); padding: 20px 22px;
+    box-shadow: var(--shadow); border: 1px solid var(--line);
+  }
+  .stat-card.hero{
+    background: linear-gradient(135deg, var(--violet) 0%, #7a6ff0 100%);
+    color: white; border: none;
+  }
+  .stat-card.hero .stat-label{ color: rgba(255,255,255,0.78); }
+  .stat-label{ font-size:12px; color: var(--ink-soft); font-weight:600; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:8px; }
+  .stat-value{ font-family:'Space Grotesk'; font-size: 27px; font-weight:700; }
+  .stat-value.pos{ color: var(--mint); }
+  .stat-value.neg{ color: var(--coral); }
+  .stat-card.hero .stat-value{ color:white; }
+  .stat-sub{ font-size:11.5px; color: var(--ink-soft); margin-top:6px; }
+  .stat-card.hero .stat-sub{ color: rgba(255,255,255,0.7); }
+
+  .grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .grid-main{ display:grid; grid-template-columns: 1.5fr 1fr; gap: 18px; margin-bottom: 18px; }
+
+  .card{
+    background: var(--surface); border-radius: var(--radius-lg); padding: 22px;
+    box-shadow: var(--shadow); border: 1px solid var(--line); margin-bottom: 18px;
+  }
+  .card-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .card-head h2{ font-size: 16px; margin:0; font-weight:700; }
+  .card-head .hint{ font-size:11.5px; color: var(--ink-soft); }
+  .badge{
+    font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;
+    padding:3px 9px; border-radius:999px;
+  }
+  .badge.compra{ background: var(--violet-soft); color: var(--violet); }
+  .badge.venta{ background: var(--mint-soft); color: var(--mint); }
+
+  .field{ display:flex; flex-direction:column; gap:5px; margin-bottom:12px; }
+  .field label{ font-size:11.5px; font-weight:600; color: var(--ink-soft); }
+  .field input, .field select{
+    font-family:'Inter'; font-size:13.5px; padding: 10px 12px;
+    border-radius: var(--radius-sm); border: 1.5px solid var(--line); background: var(--surface-2);
+    color: var(--ink);
+  }
+  .field input:focus, .field select:focus{ outline:none; border-color: var(--violet); background: white; }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  .btn{
+    font-family:'Inter'; font-weight:600; font-size:13px; padding: 10px 18px;
+    border-radius: 999px; border:none; cursor:pointer; background: var(--ink); color:white;
+  }
+  .btn:hover{ opacity:0.88; }
+  .btn.primary{ background: var(--violet); }
+  .btn.success{ background: var(--mint); }
+  .btn.ghost{ background: var(--surface-2); color: var(--ink); border:1px solid var(--line); }
+  .btn.small{ padding:6px 12px; font-size:12px; }
+  .btn:disabled{ opacity:0.4; cursor:not-allowed; }
+  .btn-row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+
+  .preview-box{
+    margin-top: 4px; padding: 14px 16px; border-radius: var(--radius-md);
+    background: var(--surface-2); border: 1.5px dashed var(--line);
+    display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
+  }
+  .preview-box .p-label{ font-size:11.5px; color: var(--ink-soft); font-weight:600; }
+  .preview-box .p-value{ font-family:'Space Grotesk'; font-weight:700; font-size:20px; }
+  .preview-box .p-value.pos{ color: var(--mint); }
+  .preview-box .p-value.neg{ color: var(--coral); }
+
+  table{ width:100%; border-collapse: collapse; font-size: 13px; }
+  thead th{
+    text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:0.05em;
+    color: var(--ink-soft); padding: 8px 10px; border-bottom: 1.5px solid var(--line);
+  }
+  tbody td{ padding: 11px 10px; border-bottom: 1px solid var(--line); vertical-align:middle; }
+  tbody tr:last-child td{ border-bottom:none; }
+  .model-chip{ display:inline-flex; align-items:center; gap:8px; font-weight:600; }
+  .dot{ width:8px; height:8px; border-radius:50%; background: var(--violet); flex:none; }
+  .amt{ font-variant-numeric: tabular-nums; font-weight:600; }
+  .amt.pos{ color: var(--mint); }
+  .amt.neg{ color: var(--coral); }
+  .icon-btn{
+    background:none; border:none; cursor:pointer; color: var(--ink-soft); font-size:15px; opacity:0.6;
+  }
+  .icon-btn:hover{ opacity:1; color: var(--coral); }
+  .empty{ text-align:center; padding: 26px 10px; color: var(--ink-soft); font-size:13px; }
+
+  .catalog-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(190px,1fr)); gap: 12px; }
+  .model-card{
+    border: 1px solid var(--line); border-radius: var(--radius-md); padding: 14px;
+    background: var(--surface-2);
+  }
+  .model-card h4{ margin:0 0 8px; font-size:13.5px; font-weight:700; }
+  .model-card .mc-row{ display:flex; justify-content:space-between; font-size:12px; color: var(--ink-soft); margin-bottom:3px; }
+  .model-card .mc-row b{ color: var(--ink); font-weight:600; }
+
+  .goal-wrap{ display:flex; align-items:center; gap: 20px; flex-wrap:wrap; }
+  .ring{ position:relative; width:120px; height:120px; flex:none; }
+  .ring svg{ transform: rotate(-90deg); }
+  .ring-label{
+    position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
+  .ring-label .pct{ font-family:'Space Grotesk'; font-weight:700; font-size:20px; }
+  .ring-label .txt{ font-size:9.5px; color: var(--ink-soft); text-transform:uppercase; letter-spacing:0.04em; }
+  .goal-info{ flex:1; min-width:180px; }
+  .goal-info .g-target{ font-family:'Space Grotesk'; font-size:20px; font-weight:700; margin-bottom:2px; }
+  .goal-info .g-sub{ font-size:12px; color: var(--ink-soft); }
+  .goal-form{ margin-top:14px; }
+
+  .chart-box{ background: var(--surface-2); border-radius: var(--radius-md); padding:14px; border:1px solid var(--line); }
+  .chart-box h3{ margin:0 0 10px; font-size:12px; text-transform:uppercase; letter-spacing:0.04em; color: var(--ink-soft); }
+
+  input[type="file"]{ display:none; }
+
+  footer{ text-align:center; font-size:11.5px; color: var(--ink-soft); margin-top: 20px; }
+
+  @media (max-width: 980px){
+    .stats{ grid-template-columns: repeat(2,1fr); }
+    .grid-main{ grid-template-columns: 1fr; }
+    .grid-2{ grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px){
+    .stats{ grid-template-columns: 1fr; }
+    .row2{ grid-template-columns: 1fr; }
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>🚀 Mi App Personal</h1>
-        
-        <div class="placeholder">
-            <p>Aquí irá tu código HTML...</p>
-        </div>
-        
-        <div class="info">
-            <strong>✓ GitHub Pages está activo</strong><br>
-            Tu aplicación está lista para funcionar en: <br>
-            <strong>https://paumora.github.io/ReventaPau/</strong>
-        </div>
-        
-        <div class="info">
-            <strong>📝 Instrucciones:</strong><br>
-            Solo reemplaza el contenido de este archivo con tu código HTML y la app funcionará automáticamente.
-        </div>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">RT</div>
+      <div>
+        <h1>ReventaTech</h1>
+        <p>Consolas, accesorios y juegos — compra, vende, sigue tu beneficio.</p>
+      </div>
     </div>
+    <span class="status-pill" id="fileStatus">Sin archivo cargado — exporta al terminar para no perder nada</span>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card hero">
+      <div class="stat-label">Dinero generado</div>
+      <div class="stat-value" id="statGenerado">0,00 €</div>
+      <div class="stat-sub" id="statGeneradoSub">0 operaciones cerradas</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Invertido en stock actual</div>
+      <div class="stat-value" id="statStock">0,00 €</div>
+      <div class="stat-sub" id="statStockSub">0 unidades sin vender</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">ROI global</div>
+      <div class="stat-value" id="statRoi">—</div>
+      <div class="stat-sub">beneficio ÷ total comprado</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Unidades compradas</div>
+      <div class="stat-value" id="statUnidades">0</div>
+      <div class="stat-sub" id="statUnidadesSub">0 vendidas · 0 en stock</div>
+    </div>
+  </div>
+
+  <div class="grid-main">
+    <div class="card">
+      <div class="card-head">
+        <h2><span class="badge compra">Compra</span></h2>
+        <span class="hint">Añade una unidad a tu inventario</span>
+      </div>
+      <form id="purchaseForm">
+        <div class="row2">
+          <div class="field">
+            <label for="p-modelo">Modelo</label>
+            <input list="modelos-list" id="p-modelo" placeholder="Nintendo Switch OLED" required>
+            <datalist id="modelos-list">
+              <option value="Nintendo Switch">
+              <option value="Nintendo Switch OLED">
+              <option value="Nintendo Switch Lite">
+              <option value="Nintendo Switch 2">
+              <option value="PlayStation 5">
+              <option value="PlayStation 5 Slim">
+              <option value="PlayStation 5 Digital">
+              <option value="PlayStation 4">
+              <option value="Xbox Series X">
+              <option value="Xbox Series S">
+            </datalist>
+          </div>
+          <div class="field">
+            <label for="p-categoria">Categoría</label>
+            <select id="p-categoria">
+              <option>Consola</option>
+              <option>Mando / accesorio</option>
+              <option>Juego</option>
+              <option>Otro</option>
+            </select>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="p-estado">Estado</label>
+            <select id="p-estado">
+              <option>Nuevo (precintado)</option>
+              <option>Como nuevo</option>
+              <option>Buen estado</option>
+              <option>Usado</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="p-canal">Comprado en</label>
+            <input type="text" id="p-canal" placeholder="Wallapop, tienda, particular…">
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="p-precio">Precio de compra (€)</label>
+            <input type="number" id="p-precio" step="0.01" min="0" required>
+          </div>
+          <div class="field">
+            <label for="p-fecha">Fecha</label>
+            <input type="date" id="p-fecha" required>
+          </div>
+        </div>
+        <button type="submit" class="btn primary">+ Añadir al stock</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2><span class="badge venta">Venta</span></h2>
+        <span class="hint">Cierra una unidad en stock</span>
+      </div>
+      <form id="saleForm">
+        <div class="field">
+          <label for="s-item">Unidad a vender</label>
+          <select id="s-item" required>
+            <option value="">Selecciona una unidad en stock…</option>
+          </select>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="s-precio">Precio de venta (€)</label>
+            <input type="number" id="s-precio" step="0.01" min="0" required>
+          </div>
+          <div class="field">
+            <label for="s-canal">Vendido en</label>
+            <input type="text" id="s-canal" placeholder="Wallapop, eBay, tienda…">
+          </div>
+        </div>
+        <div class="field">
+          <label for="s-fecha">Fecha de venta</label>
+          <input type="date" id="s-fecha" required>
+        </div>
+        <div class="preview-box" id="salePreview">
+          <div>
+            <div class="p-label">Retorno inmediato</div>
+            <div class="p-value" id="previewBeneficio">—</div>
+          </div>
+          <div>
+            <div class="p-label">ROI</div>
+            <div class="p-value" id="previewRoi">—</div>
+          </div>
+        </div>
+        <button type="submit" class="btn success" style="margin-top:12px;" id="saleSubmit" disabled>Registrar venta</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>Catálogo en stock</h2>
+      <span class="hint">Modelos que manejas y cuánto tienes invertido en cada uno</span>
+    </div>
+    <div class="catalog-grid" id="catalogGrid">
+      <div class="empty">Aún no hay artículos en stock.</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head">
+        <h2>Objetivo</h2>
+        <span class="hint">Marca una meta de beneficio</span>
+      </div>
+      <div class="goal-wrap" id="goalDisplay" style="display:none;">
+        <div class="ring">
+          <svg width="120" height="120">
+            <circle cx="60" cy="60" r="52" stroke="#e7e4dd" stroke-width="12" fill="none"/>
+            <circle id="ringProgress" cx="60" cy="60" r="52" stroke="#5b4fe9" stroke-width="12" fill="none"
+              stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
+          </svg>
+          <div class="ring-label">
+            <div class="pct" id="goalPct">0%</div>
+            <div class="txt">logrado</div>
+          </div>
+        </div>
+        <div class="goal-info">
+          <div class="g-target" id="goalTarget">0 € de 0 €</div>
+          <div class="g-sub" id="goalSub">Sin fecha límite</div>
+          <div class="btn-row" style="margin-top:10px;">
+            <button class="btn ghost small" id="btnEditGoal">Editar objetivo</button>
+          </div>
+        </div>
+      </div>
+      <form id="goalForm" class="goal-form">
+        <div class="row2">
+          <div class="field">
+            <label for="g-monto">Meta de beneficio (€)</label>
+            <input type="number" id="g-monto" step="0.01" min="0" required>
+          </div>
+          <div class="field">
+            <label for="g-hasta">Fecha límite</label>
+            <input type="date" id="g-hasta">
+          </div>
+        </div>
+        <div class="field">
+          <label for="g-desde">Contar beneficio desde</label>
+          <input type="date" id="g-desde" required>
+        </div>
+        <button type="submit" class="btn primary small">Guardar objetivo</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>Archivo de datos</h2>
+        <span class="hint">Todo vive en este navegador hasta que lo exportas</span>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary" id="btnExport">↓ Exportar .json</button>
+        <button class="btn ghost" id="btnImportTrigger">↑ Importar .json</button>
+        <input type="file" id="fileInput" accept="application/json">
+        <button class="btn ghost" id="btnClear">Vaciar todo</button>
+      </div>
+      <p class="hint" style="margin-top:12px;">Exporta al terminar cada sesión y vuelve a importar el archivo la próxima vez para seguir donde lo dejaste.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>Historial de operaciones cerradas</h2>
+      <span class="hint">Cada venta ya realizada, con su beneficio</span>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Fecha</th><th>Modelo</th><th>Compra</th><th>Venta</th><th>Beneficio</th><th>ROI</th><th></th></tr>
+      </thead>
+      <tbody id="historyBody">
+        <tr><td class="empty" colspan="7">Aún no hay operaciones cerradas.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>Inventario en stock</h2>
+      <span class="hint">Unidades compradas pendientes de vender</span>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Fecha compra</th><th>Modelo</th><th>Estado</th><th>Comprado en</th><th>Precio</th><th></th></tr>
+      </thead>
+      <tbody id="stockBody">
+        <tr><td class="empty" colspan="6">Aún no hay unidades en stock.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>Evolución</h2>
+    </div>
+    <div class="grid-2">
+      <div class="chart-box">
+        <h3>Beneficio acumulado</h3>
+        <canvas id="chartEvol" height="200"></canvas>
+      </div>
+      <div class="chart-box">
+        <h3>Beneficio por modelo</h3>
+        <canvas id="chartModelos" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <footer>ReventaTech funciona por completo en tu navegador. Ningún dato se envía a ningún servidor.</footer>
+</div>
+
+<script>
+(function(){
+  let purchases = [];
+  let goal = null;
+  let dirty = false;
+  let chartEvol, chartModelos;
+
+  const el = id => document.getElementById(id);
+  const fmt = n => (n<0?'-':'') + Math.abs(n).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+  const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+  const todayStr = () => new Date().toISOString().slice(0,10);
+  const firstOfMonth = () => { const d=new Date(); return new Date(d.getFullYear(),d.getMonth(),1).toISOString().slice(0,10); };
+
+  function markDirty(){
+    dirty = true;
+    const s = el('fileStatus');
+    s.textContent = 'Cambios sin guardar — exporta el .json';
+    s.classList.add('dirty');
+  }
+  function markClean(msg){
+    dirty = false;
+    const s = el('fileStatus');
+    s.textContent = msg;
+    s.classList.remove('dirty');
+  }
+
+  el('p-fecha').value = todayStr();
+  el('s-fecha').value = todayStr();
+  el('g-desde').value = firstOfMonth();
+
+  el('purchaseForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const modelo = el('p-modelo').value.trim();
+    const precio = parseFloat(el('p-precio').value);
+    const fecha = el('p-fecha').value;
+    if(!modelo || isNaN(precio) || precio<=0 || !fecha) return;
+    purchases.push({
+      id: uid(), modelo, categoria: el('p-categoria').value, estado: el('p-estado').value,
+      canalCompra: el('p-canal').value.trim(), precioCompra: precio, fecha, status: 'stock'
+    });
+    el('p-modelo').value=''; el('p-canal').value=''; el('p-precio').value='';
+    el('p-modelo').focus();
+    markDirty();
+    renderAll();
+  });
+
+  function updateSaleOptions(){
+    const sel = el('s-item');
+    const currentVal = sel.value;
+    sel.innerHTML = '<option value="">Selecciona una unidad en stock…</option>';
+    purchases.filter(p=>p.status==='stock').forEach(p=>{
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = `${p.modelo} — comprada ${p.fecha} por ${fmt(p.precioCompra)}`;
+      sel.appendChild(opt);
+    });
+    if([...sel.options].some(o=>o.value===currentVal)) sel.value = currentVal;
+  }
+
+  function updateSalePreview(){
+    const id = el('s-item').value;
+    const precioVenta = parseFloat(el('s-precio').value);
+    const item = purchases.find(p=>p.id===id);
+    const bEl = el('previewBeneficio'), rEl = el('previewRoi');
+    if(!item || isNaN(precioVenta)){
+      bEl.textContent='—'; bEl.className='p-value';
+      rEl.textContent='—'; rEl.className='p-value';
+      el('saleSubmit').disabled = true;
+      return;
+    }
+    const beneficio = precioVenta - item.precioCompra;
+    const roi = item.precioCompra>0 ? (beneficio/item.precioCompra*100) : 0;
+    bEl.textContent = fmt(beneficio);
+    bEl.className = 'p-value ' + (beneficio>=0?'pos':'neg');
+    rEl.textContent = (roi>=0?'+':'') + roi.toFixed(1) + '%';
+    rEl.className = 'p-value ' + (roi>=0?'pos':'neg');
+    el('saleSubmit').disabled = false;
+  }
+  el('s-item').addEventListener('change', updateSalePreview);
+  el('s-precio').addEventListener('input', updateSalePreview);
+
+  el('saleForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const id = el('s-item').value;
+    const item = purchases.find(p=>p.id===id);
+    const precioVenta = parseFloat(el('s-precio').value);
+    const fechaVenta = el('s-fecha').value;
+    if(!item || isNaN(precioVenta) || !fechaVenta) return;
+    item.status = 'vendido';
+    item.precioVenta = precioVenta;
+    item.canalVenta = el('s-canal').value.trim();
+    item.fechaVenta = fechaVenta;
+    el('saleForm').reset();
+    el('s-fecha').value = todayStr();
+    updateSalePreview();
+    markDirty();
+    renderAll();
+  });
+
+  el('goalForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const monto = parseFloat(el('g-monto').value);
+    const desde = el('g-desde').value;
+    const hasta = el('g-hasta').value || null;
+    if(isNaN(monto) || monto<=0 || !desde) return;
+    goal = { monto, desde, hasta };
+    markDirty();
+    renderAll();
+  });
+  el('btnEditGoal').addEventListener('click', () => {
+    if(!goal) return;
+    el('g-monto').value = goal.monto;
+    el('g-desde').value = goal.desde;
+    el('g-hasta').value = goal.hasta || '';
+    el('goalDisplay').style.display = 'none';
+    el('goalForm').style.display = 'block';
+  });
+
+  function renderGoal(){
+    const disp = el('goalDisplay'), form = el('goalForm');
+    if(!goal){
+      disp.style.display = 'none';
+      form.style.display = 'block';
+      return;
+    }
+    disp.style.display = 'flex';
+    form.style.display = 'none';
+    const generadoEnPeriodo = purchases
+      .filter(p=>p.status==='vendido' && p.fechaVenta >= goal.desde && (!goal.hasta || p.fechaVenta <= goal.hasta))
+      .reduce((s,p)=>s+(p.precioVenta-p.precioCompra),0);
+    const pct = Math.max(0, Math.min(100, (generadoEnPeriodo/goal.monto)*100));
+    const circumference = 2*Math.PI*52;
+    el('ringProgress').setAttribute('stroke-dasharray', circumference.toFixed(1));
+    el('ringProgress').setAttribute('stroke-dashoffset', (circumference*(1-pct/100)).toFixed(1));
+    el('ringProgress').setAttribute('stroke', pct>=100 ? '#1aa06d' : '#5b4fe9');
+    el('goalPct').textContent = Math.round(pct) + '%';
+    el('goalTarget').textContent = `${fmt(generadoEnPeriodo)} de ${fmt(goal.monto)}`;
+    el('goalSub').textContent = goal.hasta ? `Del ${goal.desde} al ${goal.hasta}` : `Desde el ${goal.desde}`;
+  }
+
+  function renderStats(){
+    const vendidos = purchases.filter(p=>p.status==='vendido');
+    const enStock = purchases.filter(p=>p.status==='stock');
+    const beneficioTotal = vendidos.reduce((s,p)=>s+(p.precioVenta-p.precioCompra),0);
+    const invertidoStock = enStock.reduce((s,p)=>s+p.precioCompra,0);
+    const totalComprado = purchases.reduce((s,p)=>s+p.precioCompra,0);
+    const roiGlobal = totalComprado>0 ? (beneficioTotal/totalComprado*100) : null;
+
+    el('statGenerado').textContent = fmt(beneficioTotal);
+    el('statGeneradoSub').textContent = `${vendidos.length} operaciones cerradas`;
+    el('statStock').textContent = fmt(invertidoStock);
+    el('statStockSub').textContent = `${enStock.length} unidades sin vender`;
+    const roiEl = el('statRoi');
+    roiEl.textContent = roiGlobal===null ? '—' : (roiGlobal>=0?'+':'')+roiGlobal.toFixed(1)+'%';
+    roiEl.className = 'stat-value ' + (roiGlobal===null?'':(roiGlobal>=0?'pos':'neg'));
+    el('statUnidades').textContent = purchases.length;
+    el('statUnidadesSub').textContent = `${vendidos.length} vendidas · ${enStock.length} en stock`;
+  }
+
+  function renderCatalog(){
+    const grid = el('catalogGrid');
+    const enStock = purchases.filter(p=>p.status==='stock');
+    if(enStock.length===0){
+      grid.innerHTML = '<div class="empty">Aún no hay artículos en stock.</div>';
+      return;
+    }
+    const byModel = {};
+    enStock.forEach(p=>{
+      byModel[p.modelo] = byModel[p.modelo] || {count:0, invertido:0};
+      byModel[p.modelo].count++;
+      byModel[p.modelo].invertido += p.precioCompra;
+    });
+    grid.innerHTML = '';
+    Object.entries(byModel).sort((a,b)=>b[1].invertido-a[1].invertido).forEach(([modelo,info])=>{
+      const div = document.createElement('div');
+      div.className = 'model-card';
+      div.innerHTML = `
+        <h4>${escapeHtml(modelo)}</h4>
+        <div class="mc-row"><span>Unidades</span><b>${info.count}</b></div>
+        <div class="mc-row"><span>Invertido</span><b>${fmt(info.invertido)}</b></div>
+      `;
+      grid.appendChild(div);
+    });
+  }
+
+  function renderHistory(){
+    const body = el('historyBody');
+    const vendidos = purchases.filter(p=>p.status==='vendido').sort((a,b)=>b.fechaVenta.localeCompare(a.fechaVenta));
+    if(vendidos.length===0){
+      body.innerHTML = '<tr><td class="empty" colspan="7">Aún no hay operaciones cerradas.</td></tr>';
+      return;
+    }
+    body.innerHTML = '';
+    vendidos.forEach(p=>{
+      const beneficio = p.precioVenta - p.precioCompra;
+      const roi = p.precioCompra>0 ? beneficio/p.precioCompra*100 : 0;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${p.fechaVenta}</td>
+        <td><span class="model-chip"><span class="dot"></span>${escapeHtml(p.modelo)}</span></td>
+        <td>${fmt(p.precioCompra)}</td>
+        <td>${fmt(p.precioVenta)}</td>
+        <td class="amt ${beneficio>=0?'pos':'neg'}">${fmt(beneficio)}</td>
+        <td class="amt ${roi>=0?'pos':'neg'}">${(roi>=0?'+':'')+roi.toFixed(1)}%</td>
+        <td><button class="icon-btn" data-id="${p.id}" title="Eliminar operación">✕</button></td>
+      `;
+      body.appendChild(tr);
+    });
+    body.querySelectorAll('.icon-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        purchases = purchases.filter(p=>p.id!==btn.dataset.id);
+        markDirty(); renderAll();
+      });
+    });
+  }
+
+  function renderStockTable(){
+    const body = el('stockBody');
+    const enStock = purchases.filter(p=>p.status==='stock').sort((a,b)=>a.fecha.localeCompare(b.fecha));
+    if(enStock.length===0){
+      body.innerHTML = '<tr><td class="empty" colspan="6">Aún no hay unidades en stock.</td></tr>';
+      return;
+    }
+    body.innerHTML='';
+    enStock.forEach(p=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${p.fecha}</td>
+        <td><span class="model-chip"><span class="dot"></span>${escapeHtml(p.modelo)}</span></td>
+        <td>${escapeHtml(p.estado||'—')}</td>
+        <td>${escapeHtml(p.canalCompra||'—')}</td>
+        <td class="amt">${fmt(p.precioCompra)}</td>
+        <td><button class="icon-btn" data-id="${p.id}" title="Eliminar">✕</button></td>
+      `;
+      body.appendChild(tr);
+    });
+    body.querySelectorAll('.icon-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        purchases = purchases.filter(p=>p.id!==btn.dataset.id);
+        markDirty(); renderAll();
+      });
+    });
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function renderCharts(){
+    const vendidos = [...purchases.filter(p=>p.status==='vendido')].sort((a,b)=>a.fechaVenta.localeCompare(b.fechaVenta));
+    let running = 0;
+    const labels = [], data = [];
+    vendidos.forEach(p=>{
+      running += (p.precioVenta - p.precioCompra);
+      labels.push(p.fechaVenta);
+      data.push(Number(running.toFixed(2)));
+    });
+    const ctx1 = el('chartEvol').getContext('2d');
+    if(chartEvol) chartEvol.destroy();
+    chartEvol = new Chart(ctx1,{
+      type:'line',
+      data:{ labels: labels.length?labels:['—'], datasets:[{
+        data: data.length?data:[0], borderColor:'#5b4fe9', backgroundColor:'rgba(91,79,233,0.12)',
+        fill:true, tension:0.3, pointRadius:2
+      }]},
+      options:{ plugins:{legend:{display:false}}, scales:{
+        x:{ ticks:{maxTicksLimit:6,color:'#6b6a72'}, grid:{display:false} },
+        y:{ ticks:{color:'#6b6a72', callback:v=>v+' €'}, grid:{color:'#e7e4dd'} }
+      }}
+    });
+
+    const byModel = {};
+    vendidos.forEach(p=>{ byModel[p.modelo] = (byModel[p.modelo]||0) + (p.precioVenta-p.precioCompra); });
+    const mLabels = Object.keys(byModel);
+    const mData = Object.values(byModel);
+    const ctx2 = el('chartModelos').getContext('2d');
+    if(chartModelos) chartModelos.destroy();
+    chartModelos = new Chart(ctx2,{
+      type:'bar',
+      data:{ labels: mLabels.length?mLabels:['Sin datos'], datasets:[{
+        data: mData.length?mData:[0], backgroundColor:'#5b4fe9', borderRadius:6, maxBarThickness:34
+      }]},
+      options:{ plugins:{legend:{display:false}}, scales:{
+        x:{ ticks:{color:'#6b6a72'}, grid:{display:false} },
+        y:{ ticks:{color:'#6b6a72', callback:v=>v+' €'}, grid:{color:'#e7e4dd'} }
+      }}
+    });
+  }
+
+  function renderAll(){
+    updateSaleOptions();
+    updateSalePreview();
+    renderStats();
+    renderCatalog();
+    renderHistory();
+    renderStockTable();
+    renderGoal();
+    renderCharts();
+  }
+
+  el('btnExport').addEventListener('click', () => {
+    const payload = { app:'reventatech', version:1, exportedAt:new Date().toISOString(), purchases, goal };
+    const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = todayStr();
+    a.href = url; a.download = `reventatech_${stamp}.json`; a.click();
+    URL.revokeObjectURL(url);
+    markClean(`Guardado como reventatech_${stamp}.json`);
+  });
+
+  el('btnImportTrigger').addEventListener('click', () => el('fileInput').click());
+  el('fileInput').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const payload = JSON.parse(reader.result);
+        if(!Array.isArray(payload.purchases)) throw new Error('Formato inválido');
+        purchases = payload.purchases;
+        goal = payload.goal || null;
+        markClean(`Cargado desde ${file.name}`);
+        renderAll();
+      }catch(err){
+        alert('No se ha podido leer el archivo. Comprueba que es un .json exportado desde esta misma herramienta.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  });
+
+  el('btnClear').addEventListener('click', () => {
+    if(purchases.length===0 && !goal) return;
+    if(!confirm('¿Vaciar todos los datos de esta sesión? Esta acción no se puede deshacer.')) return;
+    purchases = []; goal = null;
+    markDirty(); renderAll();
+  });
+
+  window.addEventListener('beforeunload', e => { if(dirty){ e.preventDefault(); e.returnValue=''; } });
+
+  renderAll();
+})();
+</script>
 </body>
 </html>
